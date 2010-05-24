@@ -1,0 +1,65 @@
+#!/bin/sh
+##
+## NAME: mega-download
+## 
+## Made by Stefano Viola
+## 
+## NOTE: "mega-download" e` un downloader di file hostati 
+##       su megaupload.com. Per funzionare bisogna avere 
+##       un account premium.
+##
+## LICENSE: GPL v.3
+##
+##
+
+
+echo -n "\n\n\t Mega-Download\n\n"
+
+clear(){
+    rm index.* directLink
+}
+if [ -e `pwd`/cookie ]; then
+    echo -n "Insert direct link:\n"
+    read full_link
+    echo -n "Ricavo il link diretto: \n"
+    sleep 3
+    wget -c --load-cookies ./cookie $full_link
+    temp=`cat index.* | grep files`
+    echo -n "Link diretto ricavato:\n"
+    sleep 2
+    echo $temp | cut -f 2 -d\">directLink
+    echo -n "Scarico file...\n" 
+    wget -c --load-cookies ./cookie "`cat directLink`"
+    clear
+
+   
+else
+    echo -n "Cookie Not present!\n"
+    echo -n "Generating new Cookie...\n\n"
+    echo -n "Insert Megaupload User:\n"
+    read user
+    stty -echo    # Disabilita la visualizzazione sullo schermo.
+    echo -n "Insert Megaupload Password:\n"
+    read passwd
+    stty echo     # Ripristina la visualizzazione sullo schermo.
+    echo -n "Generating the cookie..."
+    wget --save-cookies ./cookie --post-data "login=1&next=c%3Daccount&username=$user&password=$passwd" -O - http://www.megaupload.com/?c=account > /dev/null
+
+    status=`cat cookie | grep TRUE | awk '{print $2}'`
+   
+    if [ -z $status ]; then
+        echo -n "Error: Access Failed!\n"
+	echo -n "Cookie not Generated!\n\n"
+	rm cookie
+    else
+        echo -n "Cookie Generated!\n\n"
+    fi
+    
+    
+fi
+exit 0
+
+
+
+
+

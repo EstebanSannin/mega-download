@@ -1,0 +1,13 @@
+#########################################################
+|                                                       |
+| NAME:      mega-download                              |
+| VERSIONE:  0.1                                        |
+| AUTHOR:    Stefano Viola (aka) Esteban Sannin         |
+| LICENZE:   GPLv.3                                     |
+|                                                       |
+#########################################################
+
+DESCRIPTION:
+
+        mega-download e` un piccolo script scritto in bash utile per scaricare file
+        da megaupload.com.
