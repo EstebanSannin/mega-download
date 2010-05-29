@@ -7,7 +7,24 @@
 |                                                       |
 #########################################################
 
-DESCRIPTION:
+[DESCRIPTION]:
+               mega-download the command line downloader for only Megaupload Premiun Users
+    
+[USAGE]:                                                                                
+        mega-download http://link.megaupload.com                                                        
+        If the cookie does not exist will be asked to create                                            
 
-        mega-download e` un piccolo script scritto in bash utile per scaricare file
-        da megaupload.com.
+[OPTION]:                                                                                                
+         -h         Print this help                                                                      
+         -v         Print version info                                                                  
+         --list     List mode. Download from a list of link                                                
+                    Example: mega-download --list list-link                                              
+                    list-link= is the file containing the list of links                                  
+
+[CONFIGURATION]:   To set up mega-download is easy, just create a                                       
+                   "mega-download.cfg" in the same directory and insert                                
+                   this string:                                                                         
+                   
+                   DIR_DOWNLOAD=your-path ---> "your-path" is the directory where the files are downloaded 
+                   LIMIT_RATE=1000        ---> 1000 is a byte limit to download (0 is unlimited)        
+
