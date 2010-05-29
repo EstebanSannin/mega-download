@@ -13,53 +13,160 @@
 ##
 
 
-echo -n "\n\n\t Mega-Download\n\n"
+NULL=             #da fixare, rappresenta un valore nullo
+AUTHOR="Stefano Viola (aka) Esteban Sannin"
+EMAIL="stefanoviola[at]sannioglug[dot]org"
+COPYRIGHT="(C) 2010 Stefano Viola"
+DATA_BUILD="MAY 2010"
+VERSION="0.8"
+LICENSE="GPLv3"
+
+DIR_DOWNLOAD=`pwd`
+LIMIT_RATE=0
+FINAL_LINK=`pwd`/.directLink
+CONFIG_FILE=`pwd`/mega-download.cfg
+
+
+read_config()
+{ if [ -e $CONFIG_FILE ]; then
+        echo -n "\n\n\tLoaded configuration file mega-download.cfg...\n\n"
+    . ./mega-download.cfg
+    else
+            echo -n "\n\n\tConfiguration file mega-download.cfg not present!\n\n"
+fi
+}
+
+
+version(){
+        echo -n "\n\n\tMega-Download v0.5\n\n"
+        echo -n "   [INFO]:         Downloader for only Megaupload Premium Users\n\n"
+        echo -n "   [AUTHOR]:       $AUTHOR\n"
+        echo -n "   [EMAIL]:        $EMAIL\n"
+        echo -n "   [COPYRIGHT]:    $COPYRIGHT\n"
+        echo -n "   [DATA BUILD]:   $DATA_BUILD\n"
+        echo -n "   [VERSION]:      $VERSION\n"
+        echo -n "   [LICENSE]:      $LICENSE\n\n\n"
+
+}
 
 clear(){
-    rm index.* directLink
+    rm index.* .directLink .temp
 }
-if [ -e `pwd`/cookie ]; then
-    echo -n "Insert direct link:\n"
-    read full_link
-    echo -n "Ricavo il link diretto: \n"
-    sleep 3
-    wget -c --load-cookies ./cookie $full_link
-    temp=`cat index.* | grep files`
-    echo -n "Link diretto ricavato:\n"
-    sleep 2
-    echo $temp | cut -f 2 -d\">directLink
-    echo -n "Scarico file...\n" 
-    wget -c --load-cookies ./cookie "`cat directLink`"
-    clear
 
-   
-else
-    echo -n "Cookie Not present!\n"
-    echo -n "Generating new Cookie...\n\n"
-    echo -n "Insert Megaupload User:\n"
-    read user
-    stty -echo    # Disabilita la visualizzazione sullo schermo.
-    echo -n "Insert Megaupload Password:\n"
-    read passwd
-    stty echo     # Ripristina la visualizzazione sullo schermo.
-    echo -n "Generating the cookie..."
-    wget --save-cookies ./cookie --post-data "login=1&next=c%3Daccount&username=$user&password=$passwd" -O - http://www.megaupload.com/?c=account > /dev/null
+usage(){
+        echo -n "\n\n"
+        echo -n "\tMega-Download the command line downloader\n"
+        echo -n "\t(C) 2010 Stefano Viola\n"
+        echo -n "\tstefanoviola[at]sannioglug[dot]org\n\n"
+        echo "[INFO]:                                                                                                  "
+        echo "         Downloader only for Premium Users                                                               "
+        echo "[USAGE]:                                                                                                 "
+        echo "         mega-download http://link.megaupload.com                                                        "
+        echo "         If the cookie does not exist will be asked to create                                            "
+        echo "[OPTION]:                                                                                                "
+        echo "         -h         Print this help                                                                      "
+        echo "         -v         Print version info                                                                   "
+        echo "         --list     List mode. Download from a list of link                                              "  
+        echo "                    Example: mega-download --list list-link                                              "
+        echo "                    list-link= is the file containing the list of links                                  "
+        echo ""
+        echo "[CONFIGURATION]:    To set up mega-download is easy, just create a                                       "
+        echo "                   \"mega-download.cfg\" in the same directory and insert                                "
+        echo "                    this string:                                                                         "
+        echo ""
+        echo "                    DIR_DOWNLOAD=your-path ---> your-path is the directory where the files are downloaded"
+        echo "                    LIMIT_RATE=1000        ---> 1000 is a byte limit to download (0 is unlimited)        "
+        echo -n "\n\n"
+        #echo -n ""
+        #echo -n ""
+        #echo -n ""
+}
+capture_link(){
 
-    status=`cat cookie | grep TRUE | awk '{print $2}'`
-   
-    if [ -z $status ]; then
-        echo -n "Error: Access Failed!\n"
-	echo -n "Cookie not Generated!\n\n"
-	rm cookie
-    else
-        echo -n "Cookie Generated!\n\n"
-    fi
-    
-    
-fi
-exit 0
+        ls | grep index > .temp
+        number_link=`wc -l .temp | awk {'print $1'}`
+        dir="`pwd`/.temp"
+        for i in `seq 1 $number_link`;
+        do      
+                p=p
+                sum=$i$p
+                temp_link=`sed -n $sum $dir`
+                cat_link=`cat $temp_link | grep files`
+                cat $temp_link | grep files | cut -f 2 -d\">>.directLink
+        done    
+}
+
+download_from_list(){
+        echo pippo
+}
 
 
+case "$1" in
+        -h) usage
+                ;;
+        -v) version
+                ;;
+        -t) read_config # for debug.. 
+                ;;
+  --config) echo "Not implemented.."
+                 
+                ;;
+    --list)
+            echo "LIST MODE"
+            wget -c --load-cookies ./cookie -i $2
+            capture_link
+            echo -n "Download file...\n"
+           read_config 
+            wget -c --load-cookies ./cookie -i "$FINAL_LINK" --limit-rate=$LIMIT_RATE -P $DIR_DOWNLOAD
+            clear
 
-
+            ;;
+         *)
+                 if [ -e `pwd`/cookie ]; then
+                        if [ -z $1 ]; then               #controllo se ci sono argomenti passati da linea di comando
+                                 
+                                 echo -n "Insert direct link:\n"
+                                 read full_link
+                                 echo -n "Get direct link... \n"
+                                 sleep 3
+                                 wget -c --load-cookies ./cookie  $full_link -q
+                                 echo -n "direct link obtained!\n"
+                                 capture_link 
+                                 echo -n "Download file...\n" 
+                                 def_link=`pwd`/.directLink
+                                 read_config
+                                 wget -c --load-cookies ./cookie -i "$def_link" --limit-rate=$LIMIT_RATE -P $DIR_DOWNLOAD 
+                                 clear
+                         else 
+                                 echo -n "Get direct link... \n"
+                                 wget -c --load-cookies ./cookie $1 -q
+                                 capture_link
+                                 echo -n "Download file...\n" 
+                                 read_config
+                                 wget -c  --load-cookies ./cookie -i "$FINAL_LINK" --limit-rate=$LIMIT_RATE -P $DIR_DOWNLOAD
+                                 clear
+                         fi
+                 else
+                         echo -n "\n\n\tCookie Not present!\n"
+                         echo -n "\tGenerating new Cookie...\n\n"
+                         echo -n "Insert Megaupload User:\n"
+                         read user
+                         stty -echo    # Disabilita la visualizzazione sullo schermo.
+                         echo -n "Insert Megaupload Password:\n"
+                         read passwd
+                         stty echo     # Ripristina la visualizzazione sullo schermo.
+                         echo -n "Generating the cookie..."
+                         wget --save-cookies ./cookie --post-data "login=1&next=c%3Daccount&username=$user&password=$passwd" -O - http://www.megaupload.com/?c=account > /dev/null
+                         status=`cat cookie | grep TRUE | awk '{print $2}'`
+                         if [ -z $status ]; then
+                                 echo -n "Error: Access Failed!\n"
+                                 echo -n "Cookie not Generated!\n\n"
+                                 rm cookie
+                         else
+                                 echo -n "Cookie Generated!\n\n"
+                         fi
+                 fi
+                 ;;
+ esac
+ exit 0
 
