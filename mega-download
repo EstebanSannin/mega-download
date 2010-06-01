@@ -156,7 +156,7 @@ case "$1" in
                                             
                                             1)
                                                     echo "Current limit rate is $LIMIT_RATE_VALUE (byte)"
-                                                    echo -n "Insert new value: "
+                                                    echo -n "Insert new value (byte): "
                                                     read new_limit_rate
                                                     sed -i "s%$LIMIT_RATE_VALUE%$new_limit_rate%g" $CONFIG_FILE 
                                                     ;;
@@ -187,7 +187,7 @@ case "$1" in
             echo -n "\n\tConfigure file not present!\t\t\n"
             echo "Creating new file configuration..."
             echo ""
-            echo -n "Insert Limit Rate: "
+            echo -n "Insert Limit Rate (byte): "
             read limit
             echo -n "Insert Download directory: "
             read directory
