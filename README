@@ -19,12 +19,15 @@
          -v         Print version info                                                                  
          --list     List mode. Download from a list of link                                                
                     Example: mega-download --list list-link                                              
-                    list-link= is the file containing the list of links                                  
+                    list-link= is the file containing the list of links             
+         --config   start the interactive configuration parameters                    
 
-[CONFIGURATION]:   To set up mega-download is easy, just create a                                       
-                   "mega-download.cfg" in the same directory and insert                                
-                   this string:                                                                         
-                   
-                   DIR_DOWNLOAD=your-path ---> "your-path" is the directory where the files are downloaded 
-                   LIMIT_RATE=1000        ---> 1000 is a byte limit to download (0 is unlimited)        
+[CONFIGURATION]:    To set up mega-download is easy. There are two possibilities:
+                      1. start "mega-download --config" and sets your parameters
+ 
+                      2. Create the file:                                                                    
+                            "mega-download.cfg" in the same directory and insert this string:           
+ 
+                    DIR_DOWNLOAD=your-path ---> your-path is the directory where the files are downloaded
+                    LIMIT_RATE=1000        ---> 1000 is a byte limit to download (0 is unlimited)        
 
