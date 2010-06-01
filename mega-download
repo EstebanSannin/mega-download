@@ -13,13 +13,20 @@
 ##
 
 
-NULL=             #da fixare, rappresenta un valore nullo
 AUTHOR="Stefano Viola (aka) Esteban Sannin"
 EMAIL="stefanoviola[at]sannioglug[dot]org"
 COPYRIGHT="(C) 2010 Stefano Viola"
 DATA_BUILD="MAY 2010"
 VERSION="0.8"
 LICENSE="GPLv3"
+
+CONFIG_FILE_NAME=mega-download.cfg
+CONFIG_FILE=`pwd`/$CONFIG_FILE_NAME
+LIMIT_RATE_VALUE=`cat $CONFIG_FILE | grep LIMIT | cut -f 2 -d=`              # Valore contenuto nel file di configurazione
+DIR_DOWNLOAD_VALUE=`cat $CONFIG_FILE | grep DIR_DOWNLOAD | cut -f 2 -d\"`     # Valore contenuto nel file di configurazione
+
+#sed -i "s%`cat mega-download.cfg | grep LIMIT | cut -f 2 -d=`%1000%g" mega-download.cfg
+
 
 DIR_DOWNLOAD=`pwd`
 LIMIT_RATE=0
@@ -29,10 +36,16 @@ CONFIG_FILE=`pwd`/mega-download.cfg
 
 read_config()
 { if [ -e $CONFIG_FILE ]; then
+        . ./mega-download.cfg
         echo -n "\n\n\tLoaded configuration file mega-download.cfg...\n\n"
-    . ./mega-download.cfg
-    else
-            echo -n "\n\n\tConfiguration file mega-download.cfg not present!\n\n"
+        echo -n "   LIMIT_RATE_VALUE =   $LIMIT_RATE_VALUE\n"
+        echo -n "   DIR_DOWNLOAD_VALUE = $DIR_DOWNLOAD_VALUE\n\n\n\n"
+else
+        echo -n "\n\n\tConfiguration file mega-download.cfg not present!\n\n"
+        echo "Loaded Default Value:"
+        echo "LIMIT_RATE = $LIMIT_RATE (0 is unlimited)"
+        echo "DIR_DOWNLOAD = $DIR_DOWNLOAD"
+        echo ""
 fi
 }
 
@@ -69,10 +82,13 @@ usage(){
         echo "         --list     List mode. Download from a list of link                                              "  
         echo "                    Example: mega-download --list list-link                                              "
         echo "                    list-link= is the file containing the list of links                                  "
+        echo "         --config   start the interactive configuration parameters                                       "
         echo ""
-        echo "[CONFIGURATION]:    To set up mega-download is easy, just create a                                       "
-        echo "                   \"mega-download.cfg\" in the same directory and insert                                "
-        echo "                    this string:                                                                         "
+        echo "[CONFIGURATION]:    To set up mega-download is easy. There are two possibilities:                        "
+        echo "                  1. start \"mega-download --config\" and sets your parameters                           "
+        echo ""
+        echo "                  2. Create the file:                                                                    "
+        echo "                           \"mega-download.cfg\" in the same directory and insert this string:           "
         echo ""
         echo "                    DIR_DOWNLOAD=your-path ---> your-path is the directory where the files are downloaded"
         echo "                    LIMIT_RATE=1000        ---> 1000 is a byte limit to download (0 is unlimited)        "
@@ -108,7 +124,83 @@ case "$1" in
                 ;;
         -t) read_config # for debug.. 
                 ;;
-  --config) echo "Not implemented.."
+  --config) echo $LIMIT_RATE_VALUE
+            echo $DIR_DOWNLOAD_VALUE
+            control=1
+            if [ -e $CONFIG_FILE ]; then
+                    while [ $control = 1  ]; do
+                    echo -n "\n\t\tSetting your configuration file:\n\n"
+                    echo " 1 - Print current value"
+                    echo " 2 - Setting current value"
+                    echo " 3 - Exit menu config"
+                    echo ""
+                    echo -n "enter your choice: "
+                    read menu_value
+                    case "$menu_value" in
+
+                            1) 
+                                    echo -n "\nCurrent value:\n\n"
+                                    cat $CONFIG_FILE | grep =
+                                    echo
+                                    ;;
+                            2)
+                                    echo -n "\nChoose the value to be set:\n\n"
+                                    echo " 1 - Setting the Limit Rate"
+                                    echo " 2 - Setting the download directory"
+                                    echo " 3 - Return to main menu"
+                                    echo ""
+                                    echo -n "enter your choice: "
+                                    read submenu_value
+                                    
+                                    case "$submenu_value" in
+                                            
+                                            1)
+                                                    echo "Current limit rate is $LIMIT_RATE_VALUE (byte)"
+                                                    echo -n "Insert new value: "
+                                                    read new_limit_rate
+                                                    sed -i "s%$LIMIT_RATE_VALUE%$new_limit_rate%g" $CONFIG_FILE 
+                                                    ;;
+                                            2)
+                                                    echo "Current Download directory is: $DIR_DOWNLOAD_VALUE"
+                                                    echo -n "Insert new path: "
+                                                    read new_dir_download
+                                                    sed -i "s%$DIR_DOWNLOAD_VALUE%$new_dir_download%g" $CONFIG_FILE
+                                                    ;;
+                                            3)
+                                                    echo "Return to main menu"
+                                                    ;;
+                                            *)
+                                                    echo "Immesso valore errato"
+                                                    ;;
+                                    esac
+                                    ;;
+                            3)
+                                    control=0
+                                    echo -n "\nexit\n"
+                                    ;;
+                            *)
+                                    echo "error value"
+                                    ;;
+                    esac
+            done
+    else
+            echo -n "\n\tConfigure file not present!\t\t\n"
+            echo "Creating new file configuration..."
+            echo ""
+            echo -n "Insert Limit Rate: "
+            read limit
+            echo -n "Insert Download directory: "
+            read directory
+            echo "LIMIT_RATE=$limit" >> $CONFIG_FILE_NAME
+            echo "DIR_DOWNLOAD=$directory" >> $CONFIG_FILE_NAME
+            if [ -e $CONFIG_FILE_NAME  ]; then
+                    echo "Configuration file created!"
+            else
+                    echo "Error file not created"
+            fi
+
+
+    fi
                  
                 ;;
     --list)
