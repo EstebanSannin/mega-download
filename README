@@ -1,7 +1,7 @@
 #########################################################
 |                                                       |
 | NAME:      mega-download                              |
-| VERSIONE:  0.1                                        |
+| VERSIONE:  0.8.1                                      |
 | AUTHOR:    Stefano Viola (aka) Esteban Sannin         |
 | LICENZE:   GPLv.3                                     |
 |                                                       |
@@ -16,7 +16,8 @@
 
 [OPTION]:                                                                                                
          -h         Print this help                                                                      
-         -v         Print version info                                                                  
+         -v         Print version info 
+         -n         Normal mode. Download any file: "mega-download -n http://link-downlod"         
          --list     List mode. Download from a list of link                                                
                     Example: mega-download --list list-link                                              
                     list-link= is the file containing the list of links             

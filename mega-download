@@ -4,9 +4,8 @@
 ## 
 ## Made by Stefano Viola
 ## 
-## NOTE: "mega-download" e` un downloader di file hostati 
-##       su megaupload.com. Per funzionare bisogna avere 
-##       un account premium.
+## NOTE: mega-download is a small downloader for 
+##       Megaupload Premium Users
 ##
 ## LICENSE: GPL v.3
 ##
@@ -17,15 +16,13 @@ AUTHOR="Stefano Viola (aka) Esteban Sannin"
 EMAIL="stefanoviola[at]sannioglug[dot]org"
 COPYRIGHT="(C) 2010 Stefano Viola"
 DATA_BUILD="MAY 2010"
-VERSION="0.8"
+VERSION="0.8.1"
 LICENSE="GPLv3"
 
 CONFIG_FILE_NAME=mega-download.cfg
 CONFIG_FILE=`pwd`/$CONFIG_FILE_NAME
 LIMIT_RATE_VALUE=`cat $CONFIG_FILE | grep LIMIT | cut -f 2 -d=`              # Valore contenuto nel file di configurazione
-DIR_DOWNLOAD_VALUE=`cat $CONFIG_FILE | grep DIR_DOWNLOAD | cut -f 2 -d\"`     # Valore contenuto nel file di configurazione
-
-#sed -i "s%`cat mega-download.cfg | grep LIMIT | cut -f 2 -d=`%1000%g" mega-download.cfg
+DIR_DOWNLOAD_VALUE=`cat $CONFIG_FILE | grep DIR_DOWNLOAD | cut -f 2 -d\"`    # Valore contenuto nel file di configurazione
 
 
 DIR_DOWNLOAD=`pwd`
@@ -37,7 +34,7 @@ CONFIG_FILE=`pwd`/mega-download.cfg
 read_config()
 { if [ -e $CONFIG_FILE ]; then
         . ./mega-download.cfg
-        echo -n "\n\n\tLoaded configuration file mega-download.cfg...\n\n"
+        echo -n "\n\n\tLoaded configuration file $CONFIG_FILE...\n\n"
         echo -n "   LIMIT_RATE_VALUE =   $LIMIT_RATE_VALUE\n"
         echo -n "   DIR_DOWNLOAD_VALUE = $DIR_DOWNLOAD_VALUE\n\n\n\n"
 else
@@ -79,6 +76,7 @@ usage(){
         echo "[OPTION]:                                                                                                "
         echo "         -h         Print this help                                                                      "
         echo "         -v         Print version info                                                                   "
+        echo "         -n         Normal mode. Download any file: \"mega-download -n http://link-downlod\"             "
         echo "         --list     List mode. Download from a list of link                                              "  
         echo "                    Example: mega-download --list list-link                                              "
         echo "                    list-link= is the file containing the list of links                                  "
@@ -112,15 +110,14 @@ capture_link(){
         done    
 }
 
-download_from_list(){
-        echo pippo
-}
-
-
 case "$1" in
         -h) usage
                 ;;
         -v) version
+                ;;
+        -n) echo -n "\t\n\nNormal Mode\n"
+                read_config
+                wget -c $2 --limit-rate=$LIMIT_RATE -P $DIR_DOWNLOAD
                 ;;
         -t) read_config # for debug.. 
                 ;;
@@ -129,12 +126,16 @@ case "$1" in
             control=1
             if [ -e $CONFIG_FILE ]; then
                     while [ $control = 1  ]; do
-                    echo -n "\n\t\tSetting your configuration file:\n\n"
-                    echo " 1 - Print current value"
-                    echo " 2 - Setting current value"
-                    echo " 3 - Exit menu config"
-                    echo ""
-                    echo -n "enter your choice: "
+                    echo -n "\n\n"
+                    echo "  ***************************************"
+                    echo "  * Setting your configuration file:    *"
+                    echo "  *                                     *"
+                    echo "  * 1 - Print current value             *"
+                    echo "  * 2 - Setting current value           *"
+                    echo "  * 3 - Exit menu config                *"
+                    echo "  *                                     *"
+                    echo "  ***************************************"
+                    echo -n "\nenter your choice: "
                     read menu_value
                     case "$menu_value" in
 
@@ -144,12 +145,16 @@ case "$1" in
                                     echo
                                     ;;
                             2)
-                                    echo -n "\nChoose the value to be set:\n\n"
-                                    echo " 1 - Setting the Limit Rate"
-                                    echo " 2 - Setting the download directory"
-                                    echo " 3 - Return to main menu"
                                     echo ""
-                                    echo -n "enter your choice: "
+                                    echo "  ****************************************"
+                                    echo "  * Choose the value to be set:          *"
+                                    echo "  *                                      *"
+                                    echo "  *  1 - Setting the Limit Rate          *"
+                                    echo "  *  2 - Setting the download directory  *"
+                                    echo "  *  3 - Return to main menu             *"
+                                    echo "  *                                      *"
+                                    echo "  ****************************************"
+                                    echo -n "\nenter your choice: "
                                     read submenu_value
                                     
                                     case "$submenu_value" in
@@ -192,7 +197,7 @@ case "$1" in
             echo -n "Insert Download directory: "
             read directory
             echo "LIMIT_RATE=$limit" >> $CONFIG_FILE_NAME
-            echo "DIR_DOWNLOAD=$directory" >> $CONFIG_FILE_NAME
+            echo "DIR_DOWNLOAD=\"$directory\"" >> $CONFIG_FILE_NAME
             if [ -e $CONFIG_FILE_NAME  ]; then
                     echo "Configuration file created!"
             else
@@ -255,7 +260,8 @@ case "$1" in
                                  echo -n "Cookie not Generated!\n\n"
                                  rm cookie
                          else
-                                 echo -n "Cookie Generated!\n\n"
+                                 echo -n "\nCookie Generated!\n"
+                                 echo -n "Restart mega-download\n\n"
                          fi
                  fi
                  ;;
